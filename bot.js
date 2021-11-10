@@ -44,7 +44,7 @@ bot.command("start", (ctx) => ctx.reply("Welcome! Have fun on your dates! call /
 
 //React to /new_date command
 bot.command("new_date", (ctx) => {
-    if (ctx.session.step > 0 || ctx.session.step < Constants.totalSteps) {
+    if (ctx.session.step > 0 && ctx.session.step < Constants.totalSteps) {
         ctx.reply("You are already creating a date! call /reset_date if you are happy with the input.");
     }
     else {
@@ -66,7 +66,6 @@ bot.command("reset_date", (ctx) => {
     ctx.session.location = '';
     ctx.session.description = '';
     ctx.session.completed = false;
-    ctx.session.step = 1;
     ctx.reply("All data cleared! Call /new_date if you want to start a new date.");
 });
 
@@ -74,7 +73,7 @@ bot.command("reset_date", (ctx) => {
 bot.command("view_date", (ctx) => {
     if (ctx.session.completed) {
         ctx.reply(
-            '<p><b>The date is coming!</b></p><p><b>Date:</b>' + ctx.session.date + '</p><p><b>Time:</b>' + ctx.session.time + '</p><p><b>Meeting spot:</b>' + ctx.session.location + '</p><p><b>What you gonna do:</b>' + ctx.session.description + '</p>',
+            '<b>The date is coming!</b><b> Date: </b>' + ctx.session.date + '<b> Time: </b>' + ctx.session.time + '<b> Meeting spot: </b>' + ctx.session.location + '<b> What you gonna do: </b>' + ctx.session.description,
             { parse_mode: "HTML" },
         );
     }
@@ -85,7 +84,7 @@ bot.command("view_date", (ctx) => {
 
 bot.on("message:text", (ctx) => {
     //only reply when started a new date
-    if (ctx.session.step > 0 || ctx.session.step < Constants.totalSteps) {
+    if (ctx.session.step > 0 && ctx.session.step < Constants.totalSteps) {
         var replyMessage = Constants.replies[ctx.session.step - 1];
 
         switch (ctx.session.step) {
