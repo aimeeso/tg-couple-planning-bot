@@ -1,0 +1,25 @@
+{
+  "name": "tg-couple-planning-bot",
+  "version": "1.0.0",
+  "description": "This bot uses [GrammY](https://grammy.dev/).",
+  "main": "bot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "run": "nodemon bot.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aimeeso/tg-couple-planning-bot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aimeeso/tg-couple-planning-bot/issues"
+  },
+  "homepage": "https://github.com/aimeeso/tg-couple-planning-bot#readme",
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "grammy": "^1.4.0",
+    "nodemon": "^2.0.15"
+  }
+}
