@@ -21,3 +21,13 @@ node bot.js
 ```
 
 2. Start your bot in Telegram
+
+## Commands
+
+```/start```: Start the bot with a welcome message.
+
+```/new_date```: Start a step-by-step input for the date.
+
+```/reset_date```: Clean up the current date (only if all the information is completed in the current date).
+
+```/view_date```: View the current date.
