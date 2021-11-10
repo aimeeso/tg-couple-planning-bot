@@ -70,16 +70,21 @@ bot.command("reset_date", (ctx) => {
 });
 
 //React to /reset_date command
-bot.command("view_date", (ctx) => {
+bot.command("view_date", async (ctx) => {
+
     if (ctx.session.completed) {
-        ctx.reply(
-            '<b>The date is coming!</b><b> Date: </b>' + ctx.session.date + '<b> Time: </b>' + ctx.session.time + '<b> Meeting spot: </b>' + ctx.session.location + '<b> What you gonna do: </b>' + ctx.session.description,
-            { parse_mode: "HTML" },
+
+        const message = `*The date is coming\\!*\r\n*Date:* ${ctx?.session?.date}\r\n*Time:* ${ctx?.session?.time}\r\n*Meeting spot:* ${ctx?.session?.location}\r\n*What you gonna do:* ${ctx?.session?.description}`;
+
+        await ctx.reply(
+            message,
+            { parse_mode: "MarkdownV2" },
         );
+
+    } else {
+        await ctx.reply("You don't have/have not completed a date plan yet!");
     }
-    else {
-        ctx.reply("You don't have/have not completed a date plan yet!");
-    }
+    
 });
 
 bot.on("message:text", (ctx) => {
@@ -117,13 +122,13 @@ bot.catch((err) => {
     console.error(`Constants.replies:`+Constants.replies);
     const e = err.error;
     if (e instanceof GrammyError) {
-      console.error("Error in request:", e.description);
+        console.error("Error in request:", e.description);
     } else if (e instanceof HttpError) {
-      console.error("Could not contact Telegram:", e);
+        console.error("Could not contact Telegram:", e);
     } else {
-      console.error("Unknown error:", e);
+        console.error("Unknown error:", e);
     }
-  });
+});
 
 // Start your bot
 bot.start();
