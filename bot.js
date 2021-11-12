@@ -72,9 +72,9 @@ bot.command("reset_date", (ctx) => {
 //React to /reset_date command
 bot.command("view_date", (ctx) => {
     if (ctx.session.completed) {
-        ctx.reply(
-            '<b>The date is coming!</b><b> Date: </b>' + ctx.session.date + '<b> Time: </b>' + ctx.session.time + '<b> Meeting spot: </b>' + ctx.session.location + '<b> What you gonna do: </b>' + ctx.session.description,
-            { parse_mode: "HTML" },
+	    ctx.reply(
+            "*The date is coming\\!* \n *Date: *" + ctx.session.date + "\n *Time: *" + ctx.session.time + "\n *Meeting spot: *" + ctx.session.location + "\n *What you gonna do: *" + ctx.session.description,
+            { parse_mode: "MarkdownV2" },
         );
     }
     else {
@@ -86,6 +86,7 @@ bot.on("message:text", (ctx) => {
     //only reply when started a new date
     if (ctx.session.step > 0 && ctx.session.step < Constants.totalSteps) {
         var replyMessage = Constants.replies[ctx.session.step - 1];
+        var placeholder = Constants.placeholders[ctx.session.step - 1];
 
         switch (ctx.session.step) {
             case 1:
@@ -105,7 +106,15 @@ bot.on("message:text", (ctx) => {
 
         ctx.session.step = ctx.session.step + 1;
 
-        ctx.reply(replyMessage);
+        if(placeholder == '') {
+            ctx.reply(replyMessage);
+        }
+        else {
+            ctx.reply(replyMessage, {
+                // force Telegram client to open the reply feature
+                reply_markup: { force_reply: true, input_field_placeholder: placeholder },
+            });            
+        }
     }
 });
 
