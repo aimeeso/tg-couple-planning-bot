@@ -9,12 +9,33 @@ if (process.env.BOT_TOKEN === undefined) {
 // Create an instance of the `Bot` class and pass your authentication token to it.
 const bot = new Bot(process.env.BOT_TOKEN); // <-- put your authentication token between the ""
 
+const date_template = {
+    completed: false, // whether we know all the details of the date
+    step: 0,
+    date: '',
+    time: '',
+    location: '',
+    description: '', //short description of the date (movie? dinner?)
+}
+
 // one date info
 // install session middleware, and define the initial session value
 bot.use(
     session({
         initial() {
             return {
+                dates: [],
+                inputting: false,
+                inputing_date: {
+                    completed: false, // whether we know all the details of the date
+                    step: 0,
+                    date: '',
+                    time: '',
+                    location: '',
+                    description: '', //short description of the date (movie? dinner?)
+                },
+                viewing_date: false,
+                //old - single date (remove later)
                 completed: false, // whether we know all the details of the date
                 step: 0,
                 date: '',
@@ -37,6 +58,7 @@ bot.api.setMyCommands([
     { command: "new_date", description: "Create a new date" },
     { command: "reset_date", description: "Reset the current date" },
     { command: "view_date", description: "View the current date" },
+    { command: "test_new_date", description: "Create a new date (multiple date)" },
 ]);
 
 // React to /start command
@@ -50,7 +72,25 @@ bot.command("new_date", (ctx) => {
     else {
         ctx.session.completed = false;
         ctx.session.step = 1;
-        ctx.reply("Great! A new date! Tell me everything! Lets start with the date!", {
+        ctx.reply("Great! A new date! Tell me everything!");
+        ctx.reply("Lets start with the date!", {
+            // force Telegram client to open the reply feature
+            reply_markup: { force_reply: true, input_field_placeholder: "date, e.g. 2021-11-09 (tue)" },
+        });
+    }
+});
+
+//React to /new_date command
+bot.command("test_new_date", (ctx) => {
+    if (ctx.session.inputting) {
+        ctx.reply("You are already inputting a new date!");
+    }
+    else {
+        ctx.session.inputting = true;
+        ctx.session.inputing_date.completed = false;
+        ctx.session.inputing_date.step = 1;
+        ctx.reply("Great! A new date! Tell me everything!");
+        ctx.reply("Lets start with the date!", {
             // force Telegram client to open the reply feature
             reply_markup: { force_reply: true, input_field_placeholder: "date, e.g. 2021-11-09 (tue)" },
         });
@@ -71,41 +111,111 @@ bot.command("reset_date", (ctx) => {
 
 //React to /reset_date command
 bot.command("view_date", (ctx) => {
-    if (ctx.session.completed) {
-        ctx.reply(
-            '<b>The date is coming!</b><b> Date: </b>' + ctx.session.date + '<b> Time: </b>' + ctx.session.time + '<b> Meeting spot: </b>' + ctx.session.location + '<b> What you gonna do: </b>' + ctx.session.description,
-            { parse_mode: "HTML" },
-        );
+    //old - only one date
+    // if (ctx.session.completed) {
+    //     ctx.reply(
+    //         "*The date is coming\\!* \n *Date: *" + ctx.session.date + "\n *Time: *" + ctx.session.time + "\n *Meeting spot: *" + ctx.session.location + "\n *What you gonna do: *" + ctx.session.description,
+    //         { parse_mode: "MarkdownV2" },
+    //     );
+    // }
+    // else {
+    //     ctx.reply("You don't have/have not completed a date plan yet!");
+    // }
+    if(ctx.session.inputting) {
+        ctx.reply("You are inputting a date!");
+    }
+    else if(ctx.session.dates.length <= 0) {
+        ctx.reply("You don't have any date plan yet!");
     }
     else {
-        ctx.reply("You don't have/have not completed a date plan yet!");
+        ctx.reply('Please input the date', {
+            // force Telegram client to open the reply feature
+            reply_markup: { force_reply: true, input_field_placeholder: placeholder },
+        });      
     }
 });
 
 bot.on("message:text", (ctx) => {
     //only reply when started a new date
-    if (ctx.session.step > 0 && ctx.session.step < Constants.totalSteps) {
-        var replyMessage = Constants.replies[ctx.session.step - 1];
+    // if (ctx.session.step > 0 && ctx.session.step < Constants.totalSteps) {
+    //     var replyMessage = Constants.replies[ctx.session.step - 1];
+    //     var placeholder = Constants.placeholders[ctx.session.step - 1];
 
-        switch (ctx.session.step) {
+    //     switch (ctx.session.step) {
+    //         case 1:
+    //             ctx.session.date = ctx.message.text;
+    //             break;
+    //         case 2:
+    //             ctx.session.time = ctx.message.text;
+    //             break;
+    //         case 3:
+    //             ctx.session.location = ctx.message.text;
+    //             break;
+    //         case 4:
+    //             ctx.session.description = ctx.message.text;
+    //             ctx.session.completed = true;
+    //             ctx,session.d
+    //             break;
+    //     }
+
+    //     ctx.session.step = ctx.session.step + 1;
+
+    //     if(placeholder == '') {
+    //         ctx.reply(replyMessage);
+    //     }
+    //     else {
+    //         ctx.reply(replyMessage, {
+    //             // force Telegram client to open the reply feature
+    //             reply_markup: { force_reply: true, input_field_placeholder: placeholder },
+    //         });            
+    //     }
+    // }
+
+    if (ctx.session.inputing_date.step > 0 && ctx.session.inputing_date.step < Constants.totalSteps) {
+        var replyMessage = Constants.replies[ctx.session.inputing_date.step - 1];
+        var placeholder = Constants.placeholders[ctx.session.inputing_date.step - 1];
+
+        switch (ctx.session.inputing_date.step) {
             case 1:
-                ctx.session.date = ctx.message.text;
+                ctx.session.inputing_date.date = ctx.message.text;
+                ctx.session.inputing_date.step = ctx.session.inputing_date.step + 1;
                 break;
             case 2:
-                ctx.session.time = ctx.message.text;
+                ctx.session.inputing_date.time = ctx.message.text;
+                ctx.session.inputing_date.step = ctx.session.inputing_date.step + 1;
                 break;
             case 3:
-                ctx.session.location = ctx.message.text;
+                ctx.session.inputing_date.location = ctx.message.text;
+                ctx.session.inputing_date.step = ctx.session.inputing_date.step + 1;
                 break;
             case 4:
-                ctx.session.description = ctx.message.text;
-                ctx.session.completed = true;
+                ctx.session.inputing_date.description = ctx.message.text;
+                ctx.session.inputing_date.completed = true;
+                //push the new date to dates
+                ctx.session.dates.push(ctx.session.inputing_date);
+                //reset the inputting date
+                ctx.session.inputing_date = {
+                    completed: false,
+                    step: 0,
+                    date: '',
+                    time: '',
+                    location: '',
+                    description: '', 
+                };
+                //close inputting
+                ctx.session.inputting = false;
                 break;
         }
 
-        ctx.session.step = ctx.session.step + 1;
-
-        ctx.reply(replyMessage);
+        if(placeholder == '') {
+            ctx.reply(replyMessage);
+        }
+        else {
+            ctx.reply(replyMessage, {
+                // force Telegram client to open the reply feature
+                reply_markup: { force_reply: true, input_field_placeholder: placeholder },
+            });            
+        }
     }
 });
 
