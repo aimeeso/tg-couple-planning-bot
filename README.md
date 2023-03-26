@@ -1,6 +1,7 @@
 # tg-couple-planning-bot
 
 This bot uses [GrammY](https://grammy.dev/).
+This is a bot for couples to organize their date plans by inputting the date, location and activity.
 
 ## Installation
 
